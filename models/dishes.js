@@ -9,15 +9,15 @@ const commentSchema = new Schema({
         type: Number,
         min: 1,
         max: 5,
-        reuired: true
+        required: true
     },
     comment: {
         type: String,
-        reuired: true
+        required: true
     },
     author: {
         type: String,
-        reuired: true
+        required: true
     }
 },
     {

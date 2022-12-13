@@ -5,14 +5,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
 
-const Dish= require('./models/dishes');
+const Dish = require('./models/dishes');
 
 url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
 
-connect.then((db)=> {
+connect.then((db) => {
   console.log("Connected correctly to server");
-}, (err) => {console.log(err);});
+}, (err) => { console.log(err); });
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -30,20 +30,50 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
+
+function auth(req, res, next) {
+  console.log(req.headers);
+  var authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.setHeader('WWW-Authenticate', 'Basic');
+    var err = new Error('Authorization needed!');
+    err.status = 401;
+    return next(err);
+
+  }
+
+  var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  var user = auth[0];
+  var pass = auth[1];
+
+  if(user === 'admin' && pass === 'password'){
+    next(); //authorized
+  }
+  else{
+    res.setHeader('WWW-Authenticate','Basic');
+    var err = new Error('You are not authenticated');
+    err.status = 401;
+    return next(err);
+  }
+}
+
+app.use(auth);
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/dishes',dishRouter);
-app.use('/promotions',promoRouter);
-app.use('/leaders',leaderRouter);
+app.use('/dishes', dishRouter);
+app.use('/promotions', promoRouter);
+app.use('/leaders', leaderRouter);
+
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
+
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

@@ -3,7 +3,7 @@ const bodyParser = require('body-Parser');
 const mongoose = require('mongoose');
 
 const Dishes = require('../models/dishes');
-const { post } = require('.');
+
 
 const dishRouter = express.Router();
 
@@ -151,7 +151,7 @@ dishRouter.route('/:dishId/comments/:commentId')
             .then((dish) => {
                 if (dish != null && dish.comments.id(req.params.commentId) != null) {
                     res.statusCode = 200;
-                    res.setHeader('Cotent-Type', 'application/json');
+                    res.setHeader('Content-Type', 'application/json');
                     res.json(dish.comments.id(req.params.commentId));
                 }
                 else if (dish == null) {

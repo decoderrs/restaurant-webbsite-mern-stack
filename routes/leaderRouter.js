@@ -1,7 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-Parser');
-//{"name" : "Manager" , "description" : "promoted from team lead to manager"}
 const Leader = require('../models/leaders');
 
 const leaderRouter = express.Router();

@@ -1,0 +1,7 @@
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2ZlMWVlZGIzMWFkZDE1N2ExOGRhYzUiLCJpYXQiOjE2Nzc1OTg0NDYsImV4cCI6MTY3NzYwMjA0Nn0.t22OJCu6vdkSgba2vtk25QGT3SuD0-C-6gj31yeqfZs
+
+{"rating" : 5, "comment" : "This is a comment"}
+
+user_id for comments = 63fe1eedb31add157a18dac5
+
+comment_id = 63fe20ef4799af5a2eac9c38

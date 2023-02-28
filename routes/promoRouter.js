@@ -2,14 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser= require('body-Parser');
 const Promotions = require('../models/promotions');
-
+var auth =require('../authenticate')();
 
 const promotionRouter = express.Router();
 
 promotionRouter.use(bodyParser.json());
 
 promotionRouter.route('/')
-.get((req, res, next) => {
+.get( (req, res, next) => {
     Promotions.find({})
         .then((promotion) => {
             console.log(promotion);
@@ -19,7 +19,7 @@ promotionRouter.route('/')
         }, (err) => next(err))
         .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(auth.authenticate(), (req, res, next) => {
     Promotions.create(req.body)
         .then((promotion) => {
             res.statusCode = 200;
@@ -28,11 +28,11 @@ promotionRouter.route('/')
         }, (err) => next(err))
         .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(auth.authenticate(), (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operations not supported on /Promotionss');
 })
-.delete((req, res, next) => {
+.delete(auth.authenticate(), (req, res, next) => {
     Promotions.remove({})
         .then((promotion) => {
             res.statusCode = 200;
@@ -52,11 +52,11 @@ promotionRouter.route('/:promotionId')
         }), (err) => next((err))
             .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(auth.authenticate(), (req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /Promotionss/' + req.params.PromotionsId);
 })
-.put((req, res, next) => {
+.put(auth.authenticate(), (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promotionId)
     .then((promotion)=> {
         res.statusCode = 200;
@@ -65,7 +65,7 @@ promotionRouter.route('/:promotionId')
     } , (err) => next(err))
     .catch(( err) => next(err));
      })
-.delete((req, res, next) => {
+.delete(auth.authenticate(), (req, res, next) => {
     Promotions.findByIdAndDelete(req.params.promotionId)
     .then((promotion)=> {
         res.statusCode = 200;

@@ -14,6 +14,19 @@ var jsonWt = require('jsonwebtoken');
 
 router.use(bodyParser.json());
 
+router.get('/', auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
+  User.find({}, (err, users) => {
+    if (err) {
+      var err = new Error('No user found');
+      err.status = 404;
+      res.json({ err: err });
+    }
+    else if (users) {
+      res.json({ users: users });
+    }
+  })
+})
+
 /* GET users listing. */
 router.post('/signup', (req, res, next) => {
   User.register(new User({ username: req.body.username }),
@@ -43,19 +56,24 @@ router.post('/signup', (req, res, next) => {
           res.setHeader('Content-Type', 'application/json');
           res.json({ success: true, token: token, user: user._id, status: 'Registration Successful!' });
         });
-    }
-  });
+      }
+    });
 });
 
-router.post('/login', auth.authenticate(), (req, res) => {
-  // console.log("good night",req.user);
+router.post('/login', auth.authenticate(),(req, res, next) => {
+  console.log("good night");
+  var payload = {
+    _id: req.user._id
+  };
+  var token = getToken(payload);
+
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({ success: true, _id: req.user._id, session: req.session, status: 'You are successfully logged in!' });
+  res.json({ success: true, _id: req.user._id, token: token, session: req.session, status: 'You are successfully logged in!' });
 }
 );
 
-router.post('/logout', (req, res, next) => {
+router.post('/logout', auth.authenticate(),(req, res, next) => {
   console.log('session', req.session);
   if (req.session) {
     req.session.destroy();

@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 var auth = require('../authenticate')();
 const Dishes = require('../models/dishes');
 
-
 const dishRouter = express.Router();
 
 dishRouter.use(bodyParser.json());
@@ -20,7 +19,7 @@ dishRouter.route('/')
             }, (err) => next(err))
             .catch((err) => next(err));
     })
-    .post(auth.authenticate(), (req, res, next) => {
+    .post(auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
         Dishes.create(req.body)
             .then((dish) => {
                 console.log('Dish created ', dish);
@@ -30,11 +29,11 @@ dishRouter.route('/')
             }, (err) => next(err))
             .catch((err) => next(err));
     })
-    .put(auth.authenticate(), (req, res, next) => {
+    .put(auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
         res.statusCode = 403;
         res.end('PUT operations not supported on /dishes');
     })
-    .delete(auth.authenticate(), (req, res, next) => {
+    .delete(auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
         Dishes.remove({})
             .then((resp) => {
                 res.statusCode = 200;
@@ -129,7 +128,7 @@ dishRouter.route('/:dishId/comments')
         res.statusCode = 403;
         res.end('PUT operation not supported on /dishes/' + req.params.dishId + '/comments');
     })
-    .delete(auth.authenticate(), (req, res, next) => {
+    .delete(auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
         Dishes.findById(req.params.dishId).
             then((dish) => {
                 if (dish != null) {
@@ -176,11 +175,11 @@ dishRouter.route('/:dishId/comments/:commentId')
             .catch((err) => next(err));
     })
     .post(auth.authenticate(), (req, res, next) => {
-        res.statusCode = 200;
+        res.statusCode = 401;
         res.end('POST operation not supported on /dishes/' + req.params.dishId +
             '/comments/' + req.params.commentId);
     })
-    .put( auth.authenticate(), (req, res, next) => {
+    .put(auth.authenticate(), (req, res, next) => {
         Dishes.findById(req.params.dishId)
             .then((dish) => {
                 if (dish != null && dish.comments.id(req.params.commentId) != null) {
@@ -218,18 +217,24 @@ dishRouter.route('/:dishId/comments/:commentId')
     .delete(auth.authenticate(), (req, res, next) => {
         Dishes.findById(req.params.dishId)
             .then((dish) => {
+                // console.log("cosmos",dish.comments," try ",req.user._id);
                 if (dish != null && dish.comments.id(req.params.commentId) != null) {
-                    dish.comments.id(req.params.commentId).remove();
-                    dish.save()
-                        .then((dish) => {
-                            Dishes.findById(dish._id)
-                                .populate('comments.author')
+                    for (var i = 0; i < dish.comments.length; i++) {
+                        // console.log("Avengers", dish.comments[i].author._id, "thanos " ,req.user._id);
+                        if (dish.comments[i].author._id.equals(req.user._id)) {
+                            dish.comments.id(req.params.commentId).remove();
+                            dish.save()
                                 .then((dish) => {
-                                    res.statusCode = 200;
-                                    res.setHeader('Cotent-Type', 'application/json');
-                                    res.json(dish);
-                                })
-                        }, (err) => next(err));
+                                    Dishes.findById(dish._id)
+                                        .populate('comments.author')
+                                        .then((dish) => {
+                                            res.statusCode = 200;
+                                            res.setHeader('Cotent-Type', 'application/json');
+                                            res.json(dish);
+                                        })
+                                }, (err) => next(err));
+                        }
+                    }
                 }
                 else if (dish == null) {
                     err = new Error('Dish ' + req.params.dishId + ' not found');

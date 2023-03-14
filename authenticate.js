@@ -10,10 +10,6 @@ var jwt = require('jsonwebtoken'); //used to create, sign and verify tokens
 var config = require('./config.js');
 var User = require('./models/user');
 
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
 var opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: config.jwtSecret
@@ -35,12 +31,50 @@ module.exports = () => {
                 }
             });
         }));
+
+    passport.use(new LocalStrategy(User.authenticate()
+        // function (username, password, done) {
+        //     // console.log("Local data :", username, password);
+        //     User.findOne({ username: username }, function (err, user) {
+        //         // console.log("Sun shine", user, user.username);
+        //         if (err) { return done(err, false); }
+        //         else if (!user) { return done(null, false); }
+        //         else {return done(null, user);}
+        //     });
+        // }
+    ))
     return {
         initialize: () => {
             return passport.initialize();
         },
         authenticate: () => {
             return passport.authenticate("jwt", config.jwtSession);
+        },
+        verifyAdmin: (req, res, next) => {
+            console.log("Nice weather", req.user);
+            if (req.user) {
+                if (req.user.admin) {
+                    return next();
+                }
+                else if (!req.user.admin) {
+                    err = new Error("You are not authorized to perform this operation!");
+                    err.status = 403;
+                    return (next(err));
+                }
+            }
+            else {
+                err = new Error('User ' + req.user._id + ' not found');
+                err.status = 403;
+                return next(err);
+            }
+        }
+        ,
+        verifyUser: () => {
+            return passport.authenticate("local");
         }
     }
 }
+
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());

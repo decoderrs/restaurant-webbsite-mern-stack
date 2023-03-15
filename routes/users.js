@@ -14,7 +14,7 @@ var jsonWt = require('jsonwebtoken');
 
 router.use(bodyParser.json());
 
-router.get('/', auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
+router.get('/', auth.verifyUser(),(req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
   User.find({}, (err, users) => {
     if (err) {
       var err = new Error('No user found');
@@ -60,7 +60,7 @@ router.post('/signup', (req, res, next) => {
     });
 });
 
-router.post('/login', auth.authenticate(),(req, res, next) => {
+router.post('/login', auth.verifyUser(),(req, res, next) => {
   console.log("good night");
   var payload = {
     _id: req.user._id

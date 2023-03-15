@@ -32,16 +32,20 @@ module.exports = () => {
             });
         }));
 
-    passport.use(new LocalStrategy(User.authenticate()
-        // function (username, password, done) {
-        //     // console.log("Local data :", username, password);
-        //     User.findOne({ username: username }, function (err, user) {
-        //         // console.log("Sun shine", user, user.username);
-        //         if (err) { return done(err, false); }
-        //         else if (!user) { return done(null, false); }
-        //         else {return done(null, user);}
-        //     });
-        // }
+    passport.use(new LocalStrategy(
+        (username, password,done) => {
+            console.log("Local data :", username, password);
+            User.findOne({ username: username }, function (err, user) {
+                console.log("Sun shine", user);
+                if (err) { 
+                    return done(err); 
+                }
+                else if (user == null) { 
+                    return done(null, false); 
+                }
+                return done(null, user);
+            });
+        }
     ))
     return {
         initialize: () => {
@@ -70,7 +74,7 @@ module.exports = () => {
         }
         ,
         verifyUser: () => {
-            return passport.authenticate("local");
+            return passport.authenticate("local",config.jwtSession);
         }
     }
 }

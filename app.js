@@ -31,7 +31,7 @@ var uploadRouter = require('./routes/uploadRouter');
 var app = express();
 
 app.all('*', (req,res,next) => {
-  console.log("good day", req.secure);
+  // console.log("redirect to secure port", req.secure);
   if(req.secure) {
     return next();
   }

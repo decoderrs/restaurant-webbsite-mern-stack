@@ -18,7 +18,7 @@ var opts = {
 module.exports = () => {
     passport.use(new JwtStrategy(opts,
         (jwt_payload, done) => {
-            console.log("JWT payload: ", jwt_payload);
+            // console.log("JWT payload: ", jwt_payload);
             User.findOne({ _id: jwt_payload._id }, (err, user) => {
                 if (err) {
                     return done(new Error('user not found'), false);
@@ -34,9 +34,9 @@ module.exports = () => {
 
     passport.use(new LocalStrategy(
         (username, password,done) => {
-            console.log("Local data :", username, password);
+            // console.log("Local data :", username, password);
             User.findOne({ username: username }, function (err, user) {
-                console.log("Sun shine", user);
+                console.log("verify User", user);
                 if (err) { 
                     return done(err); 
                 }
@@ -55,7 +55,7 @@ module.exports = () => {
             return passport.authenticate("jwt", config.jwtSession);
         },
         verifyAdmin: (req, res, next) => {
-            console.log("Nice weather", req.user);
+            // console.log("verify Admin", req.user);
             if (req.user) {
                 if (req.user.admin) {
                     return next();

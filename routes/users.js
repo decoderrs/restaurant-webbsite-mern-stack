@@ -8,13 +8,16 @@ var passport = require('passport');
 
 var cfg = require('../config.js')
 var auth = require('../authenticate.js')();
+var cors = require('./cors');
 var jwt = require('jwt-simple');
 
 var jsonWt = require('jsonwebtoken');
 
 router.use(bodyParser.json());
 
-router.get('/', auth.verifyUser(),(req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
+router.route('/')
+.options(cors.corsWithOptions, (req,res) => {res.sendStatus(200);})
+.get(cors.cors, auth.verifyUser(),(req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
   User.find({}, (err, users) => {
     if (err) {
       var err = new Error('No user found');
@@ -28,7 +31,9 @@ router.get('/', auth.verifyUser(),(req, res, next) => auth.verifyAdmin(req, res,
 })
 
 /* GET users listing. */
-router.post('/signup', (req, res, next) => {
+router.route('/signup')
+.options(cors.corsWithOptions, (req,res) => {res.sendStatus(200);})
+.post(cors.corsWithOptions, (req, res, next) => {
   User.register(new User({ username: req.body.username }),
     req.body.password, (err, user) => {
       if (err) {
@@ -60,7 +65,9 @@ router.post('/signup', (req, res, next) => {
     });
 });
 
-router.post('/login', auth.verifyUser(),(req, res, next) => {
+router.route('/login')
+.options(cors.corsWithOptions, (req,res) => {res.sendStatus(200);})
+.post(cors.corsWithOptions, auth.verifyUser(),(req, res, next) => {
   console.log("good night");
   var payload = {
     _id: req.user._id
@@ -73,7 +80,9 @@ router.post('/login', auth.verifyUser(),(req, res, next) => {
 }
 );
 
-router.post('/logout', auth.authenticate(),(req, res, next) => {
+router.route('/logout')
+.options(cors.corsWithOptions, (req,res) => {res.sendStatus(200);})
+.post(cors.corsWithOptions, auth.authenticate(),(req, res, next) => {
   console.log('session', req.session);
   if (req.session) {
     req.session.destroy();

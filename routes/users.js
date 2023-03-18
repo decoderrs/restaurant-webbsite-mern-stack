@@ -12,6 +12,7 @@ var cors = require('./cors');
 var jwt = require('jwt-simple');
 
 var jsonWt = require('jsonwebtoken');
+const { authenticate, session } = require('passport');
 
 router.use(bodyParser.json());
 
@@ -93,6 +94,16 @@ router.route('/logout')
     var err = new Error('You are not logged in!');
     err.status = 403;
     next(err);
+  }
+});
+
+router.get('/facebook/token', auth.facebookPassport(),(req,res) => {
+  // console.log('request user',req.user._id)
+  if (req.user) {
+    var token = getToken({_id: req.user._id});
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ success: true, token: token, status: 'You are successfully logged in!'});
   }
 });
 

@@ -6,7 +6,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var LocalStrategy = require('passport-local').Strategy;
 
 var jwt = require('jsonwebtoken'); //used to create, sign and verify tokens
-
+var FacebookTokenStrategy = require('passport-facebook-token');
 var config = require('./config.js');
 var User = require('./models/user');
 
@@ -14,6 +14,9 @@ var opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: config.jwtSecret
 };
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 module.exports = () => {
     passport.use(new JwtStrategy(opts,
@@ -33,20 +36,54 @@ module.exports = () => {
         }));
 
     passport.use(new LocalStrategy(
-        (username, password,done) => {
+        (username, password, done) => {
             // console.log("Local data :", username, password);
             User.findOne({ username: username }, function (err, user) {
-                console.log("verify User", user);
-                if (err) { 
-                    return done(err); 
+                // console.log("verify User", user);
+                if (err) {
+                    return done(err);
                 }
-                else if (user == null) { 
-                    return done(null, false); 
+                else if (user == null) {
+                    return done(null, false);
                 }
                 return done(null, user);
             });
         }
     ))
+
+    passport.use(new FacebookTokenStrategy({
+        clientID: config.facebook.clientId,
+        clientSecret: config.facebook.clientSecret
+    }, (accessToken, refreshToken, profile, done) => {
+        User.findOne({ facebookId: profile.id }, 
+            (err, user) => {
+            if (err) {
+                return done(err, false);
+            }
+            if (!err && user !== null) {
+                // console.log('Good to be here',user);
+                return done(null, user);
+            }
+            else {
+                // console.log('Register here');
+                user = new User({ username: profile.displayName });
+                user.facebookId = profile.id;
+                user.firstname = profile.name.givenName;
+                user.lastname = profile.name.familyName;
+                user.save((err, user) => {
+                    if (err) {
+                        return done(err, false);
+                    }
+                    else {
+                        // console.log('Facebook auth',user);
+                        return done(null, user);
+                    }
+                });
+            }
+        });
+    }
+    ));
+
     return {
         initialize: () => {
             return passport.initialize();
@@ -74,11 +111,12 @@ module.exports = () => {
         }
         ,
         verifyUser: () => {
-            return passport.authenticate("local",config.jwtSession);
+            return passport.authenticate("local", config.jwtSession);
+        },
+        facebookPassport: () => {
+            return passport.authenticate('facebook-token',config.jwtSession);
         }
     }
 }
+ 
 
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());

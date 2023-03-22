@@ -26,7 +26,7 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var uploadRouter = require('./routes/uploadRouter');
-const favRouter = require('./routes/favRouter');
+const favRouter = require('./routes/favoriteRouter');
 
 
 var app = express();

@@ -21,6 +21,7 @@ dishRouter.route('/')
             .catch((err) => next(err));
     })
     .post(cors.corsWithOptions,auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
+        // console.log('posting dishes',req.body);
         Dishes.create(req.body)
             .then((dish) => {
                 console.log('Dish created ', dish);
@@ -136,6 +137,7 @@ dishRouter.route('/:dishId/comments')
             then((dish) => {
                 if (dish != null) {
                     for (var i = (dish.comments.length - 1); i >= 0; i--) {
+                        console.log('testing',dish.comments.id(dish.comments[0]));
                         dish.comments.id(dish.comments[i]._id).remove();
                     }
                     dish.save()
@@ -233,7 +235,7 @@ dishRouter.route('/:dishId/comments/:commentId')
                                         .populate('comments.author')
                                         .then((dish) => {
                                             res.statusCode = 200;
-                                            res.setHeader('Cotent-Type', 'application/json');
+                                            res.setHeader('Content-Type', 'application/json');
                                             res.json(dish);
                                         })
                                 }, (err) => next(err));

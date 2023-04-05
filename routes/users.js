@@ -16,7 +16,7 @@ const { authenticate, session } = require('passport');
 
 router.use(bodyParser.json());
 
-router.options('*', cors.corsWithOptions, passport.authenticate('local'),(req, res) => { res.sendStatus(200); });
+router.options('*', cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
 router.get('/', cors.cors, auth.verifyUser(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
   User.find({}, (err, users) => {
@@ -67,8 +67,8 @@ router.route('/signup')
   });
 
 router.route('/login')
-  .post(cors.corsWithOptions,(req, res) => { res.sendStatus(200);}, (req, res, next) => {
-    // console.log("good night");
+  .post(cors.corsWithOptions, (req, res, next) => {
+    console.log("good night");
     passport.authenticate('local', (err, user, info) => {
       if (err)
         return next(err);
@@ -78,20 +78,24 @@ router.route('/login')
         res.setHeader('Content-Type', 'application/json');
         res.json({ success: false, status: "Login Unsuccessful!", err: info });
       }
+      console.log('login to user', user);
       req.logIn(user, (err) => {
-        if (err) {
+        if (err == null) {
           res.statusCode = 401;
           res.setHeader('Content-Type', "application/json");
-          res.json({ success: false, status: 'Login Unsuccessful!', err: 'Could not Login user' });
+          res.json({ success: false, status: 'Login Unsuccessful!',errmess: err, err: 'Could not Login user' });
         }
-        var payload = {
-          _id: req.user._id
-        };
-        var token = getToken(payload);
+        else {
+          var payload = {
+            _id: user._id
+          };
+          var token = getToken(payload);
 
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({ success: true, token: token, session: req.session, status: 'You are successfully logged in!' });
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({ success: true, token: token, session: req.session, status: 'You are successfully logged in!' });
+
+        }
 
       });
     })(req, res, next);

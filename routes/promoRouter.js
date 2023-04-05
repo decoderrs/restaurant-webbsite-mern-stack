@@ -21,6 +21,7 @@ promotionRouter.route('/')
         .catch((err) => next(err));
 })
 .post(cors.corsWithOptions,auth.authenticate(), (req,res,next) => auth.verifyAdmin(req,res,next),(req, res, next) => {
+console.log('promo',req.user._id,req.body);
     Promotions.create(req.body)
         .then((promotion) => {
             res.statusCode = 200;

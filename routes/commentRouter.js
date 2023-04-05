@@ -19,13 +19,14 @@ commentRouter.route('/')
         Comments.find(req.query)
             .populate('author')
             .then((comments) => {
-                if (dish != null) {
+                console.log('comment.find',comments)
+                if (comments != null) {
                     res.statusCode = 200;
                     res.setHeader('Content-Type', 'application/json');
                     res.json(comments);
                 }
                 else {
-                    err = new Error('Dish ' + req.params.dishId + ' not found ');
+                    err = new Error('Comment ' + req.params.commentId + ' not found ');
                     err.status = 404;
                     return next(err);
                 }
@@ -55,7 +56,7 @@ commentRouter.route('/')
     })
     .put(cors.corsWithOptions, auth.authenticate(), (req, res, next) => {
         res.statusCode = 403;
-        res.end('PUT operation not supported on /dishes/' + req.params.dishId + '/comments');
+        res.end('PUT operation not supported on /commentss/' + req.params.dishId + '/comments');
     })
     .delete(cors.corsWithOptions, auth.authenticate(), (req, res, next) => auth.verifyAdmin(req, res, next), (req, res, next) => {
         Comments.remove({})

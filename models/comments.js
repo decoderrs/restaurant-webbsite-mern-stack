@@ -6,6 +6,7 @@ const commentSchema = new Schema({
         type: Number,
         min: 1,
         max: 5,
+        default: 1,
         required: true
     },
     comment: {

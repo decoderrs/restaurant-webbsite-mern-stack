@@ -8,7 +8,8 @@ import { Loading } from './LoadingComponent';
 import { baseUrl } from '../shared/baseUrl';
 import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
-    function RenderDish({dish, favorite, postFavorite}) {
+    function RenderDish({dish, favorite, postFavorite, deleteFavorite}) {
+        console.log('renderDish',dish);
             return(
                 <div className="col-12 col-md-5 m-1">
                     <FadeTransform in 
@@ -18,7 +19,7 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
                         <Card>
                             <CardImg top src={baseUrl + dish.image} alt={dish.name} />
                             <CardImgOverlay>
-                                <Button outline color="primary" onClick={() => favorite ? console.log('Already favorite') : postFavorite(dish._id)}>
+                                <Button outline color="primary" onClick={() => favorite ? deleteFavorite(dish._id) : postFavorite(dish._id)}>
                                     {favorite ?
                                         <span className="fa fa-heart"></span>
                                         : 
@@ -131,6 +132,8 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
     }
 
     const DishDetail = (props) => {
+        console.log('favorite dish',props.favorites);
+       
         if (props.isLoading) {
             return(
                 <div className="container">
@@ -149,7 +152,7 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
                 </div>
             );
         }
-        else if (props.dish != null)        
+        else if (props.dish != null)       
             return (
                 <div className="container">
                     <div className="row">
@@ -163,7 +166,7 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
                         </div>
                     </div>
                     <div className="row">
-                        <RenderDish dish={props.dish} favorite={props.favorite} postFavorite={props.postFavorite} />
+                        <RenderDish dish={props.dish} favorite={props.favorites} deleteFavorite={props.deleteFavorite} postFavorite={props.postFavorite} />
                         <RenderComments comments={props.comments}
                             postComment={props.postComment}
                             dishId={props.dish._id} />

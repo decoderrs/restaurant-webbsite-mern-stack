@@ -22,7 +22,7 @@ function RenderMenuItem({ dish, deleteFavorite }) {
 }
 
 const Favorites = (props) => {
-
+    console.log('favorite array1', props.favorites.favorites);
     if (props.favorites.isLoading) {
         return(
             <div className="container">
@@ -42,6 +42,7 @@ const Favorites = (props) => {
         )
     }
     else if (props.favorites.favorites) {
+        console.log('favorite array2',props.favorites.favorites.dishes);
 
         const favorites = props.favorites.favorites.dishes.map((dish) => {
             return (

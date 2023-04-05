@@ -51,6 +51,7 @@ export const fetchDishes = () => (dispatch) => {
 
     return fetch(baseUrl + 'dishes')
         .then(response => {
+            console.log('dishes',response)
             if (response.ok) {
                 return response;
             }
@@ -302,7 +303,7 @@ export const logoutUser = () => (dispatch) => {
 export const postFavorite = (dishId) => (dispatch) => {
 
     const bearer = 'Bearer ' + localStorage.getItem('token');
-
+    console.log('dishId',dishId);
     return fetch(baseUrl + 'favorites/' + dishId, {
         method: "POST",
         body: JSON.stringify({"_id": dishId}),
@@ -363,6 +364,7 @@ export const fetchFavorites = () => (dispatch) => {
     const bearer = 'Bearer ' + localStorage.getItem('token');
 
     return fetch(baseUrl + 'favorites', {
+        method: "GET",
         headers: {
             'Authorization': bearer
         },

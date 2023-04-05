@@ -67,6 +67,7 @@ class Main extends Component {
     }
 
     const DishWithId = ({match}) => {
+      // console.log('how to do it',this.props.dishes);
       return(
         this.props.auth.isAuthenticated
         ?
@@ -76,8 +77,10 @@ class Main extends Component {
           comments={this.props.comments.comments.filter((comment) => comment.dish === match.params.dishId)}
           commentsErrMess={this.props.comments.errMess}
           postComment={this.props.postComment}
-          favorite={this.props.favorites.favorites.dishes.some((dish) => dish._id === match.params.dishId)}
+          favorites={this.props.favorites.favorites.dishes.filter((dish) => dish._id === match.params.dishId).length !== 0}
+          dishId={match.params.dishId}
           postFavorite={this.props.postFavorite}
+          deleteFavorite={this.props.deleteFavorite}
           />
         :
         <DishDetail dish={this.props.dishes.dishes.filter((dish) => dish._id === match.params.dishId)[0]}
@@ -113,7 +116,7 @@ class Main extends Component {
           <CSSTransition key={this.props.location.key} classNames="page" timeout={300}>
             <Switch>
               <Route path="/home" component={HomePage} />
-              <Route exact path='/aboutus' component={() => <About leaders={this.props.leaders} />} />} />
+              <Route exact path='/aboutus' component={() => <About leaders={this.props.leaders} />} />
               <Route exact path="/menu" component={() => <Menu dishes={this.props.dishes} />} />
               <Route path="/menu/:dishId" component={DishWithId} />
               <PrivateRoute exact path="/favorites" component={() => <Favorites favorites={this.props.favorites} deleteFavorite={this.props.deleteFavorite} />} />
